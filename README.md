@@ -21,3 +21,11 @@ This code automatically detects your project structure and locates the shared Li
 git add . #Run this command after updating your code
 git commit -m "Type what you changed" #Then run this command
 git push #Run this command to update your code to GitHub
+
+If you want to use the Underground Data in your code
+I used this line of code
+
+file_path = os.path.join(base_dir, "data.csv")  # ← This works!
+df = pd.read_csv(file_path)  # ← This reads the file successfully
+
+It will work when you combine the code I provided above and this.
