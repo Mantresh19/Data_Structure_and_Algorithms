@@ -68,7 +68,7 @@ print(f"\nPerformance plot saved to: {plot_path}")
 
 # (1b) 2. APPLICATION WITH LONDON UNDERGROUND DATA
 
-print("\n=== Application with London Underground Data ===")
+print("\nApplication with London Underground Data")
 
 # Load CSV or Excel file (reusing your Task 1a logic)
 data_path = os.path.join(base_dir, "data.csv")
@@ -96,5 +96,3 @@ queries = ['Victoria', 'Paddinton', 'NotARealStation']
 for q in queries:
     status = "Operational" if ht_london.search(q.lower()) else "Not Found"
     print(f"Query: '{q}' → {status}")
-
-print("\n=== End of Task 1(b) ===")
