@@ -10,11 +10,14 @@ Add the following code at the very top of every Task_X.py file:
 "import os
 import sys
 
-# Dynamically find the path to the Libraries folder
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 libraries_path = os.path.join(base_dir, "Libraries")
 
-# Add Libraries folder to Python import path
 sys.path.insert(0, libraries_path)"
 
 This code automatically detects your project structure and locates the shared Libraries directory — no matter which task folder the code is running from.
+
+#Run this commands after you update your code
+git add . #Run this command after updating your code
+git commit -m "Type what you changed" #Then run this command
+git push #Run this command to update your code to GitHub
