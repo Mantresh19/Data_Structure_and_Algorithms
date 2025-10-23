@@ -1,10 +1,6 @@
-# ===============================================================
 # TASK 1(b) - Operational Station Status System
 # Empirical Measurement and Application
-# Reuses logic from Task 1(a)
-# ===============================================================
 
-# --- Imports ---
 import sys
 import os
 import pandas as pd
@@ -20,15 +16,13 @@ libraries_path = os.path.join(base_dir, "Libraries")
 sys.path.insert(0, libraries_path)
 
 from chained_hashtable import ChainedHashTable
-from dll_sentinel import DLLSentinel     # dependency
+from dll_sentinel import DLLSentinel
 
-# ===============================================================
 # (1b) 1. EMPIRICAL PERFORMANCE MEASUREMENT
-# ===============================================================
 
-print("\n=== Empirical Performance Measurement ===")
+print("\nEmpirical Performance Measurement")
 
-# --- Reuse: HashTable logic from Task 1(a) ---
+# Reuse: HashTable logic from Task 1(a)
 sizes = [1000, 5000, 10000, 25000, 50000]
 queries_per_test = 10000
 avg_times = []
@@ -57,7 +51,7 @@ for n in sizes:
 
     print(f"n={n:6d} → Average time per membership check: {avg_time:.8e} s")
 
-# --- Plot results ---
+# Plot results
 plt.figure(figsize=(8, 5))
 plt.plot(sizes, avg_times, marker='o', linestyle='-')
 plt.xlabel("Dataset size (n)")
@@ -72,13 +66,11 @@ plt.show()
 
 print(f"\nPerformance plot saved to: {plot_path}")
 
-# ===============================================================
 # (1b) 2. APPLICATION WITH LONDON UNDERGROUND DATA
-# ===============================================================
 
 print("\n=== Application with London Underground Data ===")
 
-# --- Load CSV or Excel file (reusing your Task 1a logic) ---
+# Load CSV or Excel file (reusing your Task 1a logic)
 data_path = os.path.join(base_dir, "data.csv")
 df = pd.read_csv(data_path)
 
@@ -99,7 +91,7 @@ ht_london = ChainedHashTable(len(stations) * 2)
 for s in stations:
     ht_london.insert(s.lower())
 
-# --- Test a few lookups (presence + absence) ---
+# Test a few lookups (presence + absence)
 queries = ['Victoria', 'Paddinton', 'NotARealStation']
 for q in queries:
     status = "Operational" if ht_london.search(q.lower()) else "Not Found"
