@@ -1,8 +1,8 @@
-import os
-import sys
 import pandas as pd
 import time
 import matplotlib.pyplot as plt
+import os
+import sys
 
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 libraries_path = os.path.join(base_dir, "Libraries")
@@ -16,7 +16,7 @@ def measure_mst_times():
     avg_times = []
     for n in sizes:
         G = generate_random_graph(n, 0.015, True, False, True, 1, 14)
-        runs = 2
+        runs = 6
         total_time = 0
         for _ in range(runs):
             start = time.perf_counter()
@@ -39,25 +39,27 @@ def plot_results(sizes, avg_times):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
 if __name__ == "__main__":
     sizes, avg_times = measure_mst_times()
     plot_results(sizes, avg_times)
-FILEPATH = "underground.xlsx"
-file_path = os.path.join(base_dir, "data.csv")
-df = pd.read_csv(file_path, usecols=[1,2,3])
+FILEPATH = os.path.join(base_dir, "data.csv")
+df = pd.read_csv(FILEPATH, header=None, skiprows=1, usecols=[1, 2, 3])
 df.columns = ["StationA", "StationB", "Time"]
 df = df.dropna(subset=["StationA", "StationB", "Time"])
 df["StationA"] = df["StationA"].astype(str).str.strip()
 df["StationB"] = df["StationB"].astype(str).str.strip()
 df["Time"] = pd.to_numeric(df["Time"], errors="coerce")
 df = df[df["Time"].notna()]
-seen = set()
-edges = []
+edge_map = {}
 for a, b, w in zip(df["StationA"], df["StationB"], df["Time"]):
     key = (a, b) if a <= b else (b, a)
-    if key not in seen:
-        seen.add(key)
-        edges.append((*key, float(w)))
+    w = float(w)
+    if key not in edge_map or w < edge_map[key]:
+        edge_map[key] = w
+
+edges = [(a, b, w) for (a, b), w in edge_map.items()]
+
 
 stations = sorted({u for u, v, _ in edges} | {v for u, v, _ in edges})
 idx = {name: i for i, name in enumerate(stations)}

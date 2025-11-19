@@ -17,6 +17,7 @@ sys.path.insert(0, libraries_path)
 from chained_hashtable import ChainedHashTable
 from dll_sentinel import DLLSentinel
 
+
 # 1. SMALL ARTIFICIAL DATASET (5 STATIONS)
 
 print("Simple Dataset Example (A–E)")

@@ -1,89 +1,115 @@
-# Written by Mantresh
-import time
-import random
-import matplotlib.pyplot as plt
+import random, time
+import pandas as pd
+from collections import defaultdict
+import os, sys
+
+# Determine project directory so we can import custom libraries
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+libraries_path = os.path.join(base_dir, "Libraries")
+sys.path.insert(0, libraries_path)
+
+from clrsPython import bfs  # mandatory library
+
+# REUSE FUNCTION FROM TASK 3(a)
+# Breadth-First Search to compute the fewest-stops path between stations
+def fewest_stops_path_bfs(graph, start, goal):
+    # Track visited stations to avoid revisiting
+    visited = {station: False for station in graph}
+    # Parent map to reconstruct the final path
+    parent = {station: None for station in graph}
+    # BFS queue
+    queue = []
+
+    # BFS search loop
+    queue.append(start)
+    visited[start] = True
+
+    while queue:
+        current = queue.pop(0)
+        # Stop when goal found
+        if current == goal:
+            break
+        # Explore neighbours
+        for neighbor in graph[current]:
+            if not visited[neighbor]:
+                visited[neighbor] = True
+                parent[neighbor] = current
+                queue.append(neighbor)
+
+    # reconstruct path
+    path = []
+    current = goal
+    while current is not None:
+        path.insert(0, current)
+        current = parent[current]
+
+    # Return valid path and number of stops
+    if path[0] == start:
+        return path, len(path) - 1
+    else:
+        return None, None
 
 
-def generate_unweighted_network(n, connection_probability=0.3):
-    """Generate artificial tube network with n stations (unweighted)"""
-    graph = {i: [] for i in range(n)}
-
+# Generate artificial networks of size n
+def generate_artificial_network(n):
+    graph = defaultdict(list)
     for i in range(n):
-        for j in range(i + 1, n):
-            if random.random() < connection_probability:
+        # Each node connects to up to 3 random others
+        connections = random.sample(range(n), k=min(3, n-1))
+        for j in connections:
+            if i != j:
                 graph[i].append(j)
                 graph[j].append(i)
-
     return graph
 
 
-def measure_bfs_performance(n, num_tests=100):
-    """Measure average BFS execution time for network size n"""
-    graph = generate_unweighted_network(n)
+# Empirical timing
+import matplotlib.pyplot as plt
+# Network sizes to test
+sizes = [100, 200, 400, 600, 800, 1000] # Store average BFS runtimes
+avg_times = []
+
+for n in sizes:
+    graph = generate_artificial_network(n)
+    # Choose 10 random start–goal pairs
+    pairs = [(random.randint(0, n-1), random.randint(0, n-1)) for _ in range(10)]
     total_time = 0
-    successful_tests = 0
+    for s, g in pairs:
+        start_time = time.time()
+        fewest_stops_path_bfs(graph, s, g)
+        total_time += (time.time() - start_time)
+    # Average BFS time for this network size
+    avg_times.append(total_time / len(pairs))
 
-    for _ in range(num_tests):
-        start = random.randint(0, n - 1)
-        end = random.randint(0, n - 1)
-
-        # Ensure start != end for meaningful test
-        while start == end:
-            end = random.randint(0, n - 1)
-
-        try:
-            start_time = time.time()
-            path, stops = bfs_fewest_stops(graph, start, end)
-            end_time = time.time()
-
-            # Only count if path exists
-            if path is not None:
-                total_time += (end_time - start_time)
-                successful_tests += 1
-        except:
-            continue
-
-    return total_time / successful_tests if successful_tests > 0 else 0
+# Plot runtime vs graph size
+plt.plot(sizes, avg_times, marker='o')
+plt.title('Average BFS Time vs Network Size (Fewest Stops)')
+plt.xlabel('Number of Stations (n)')
+plt.ylabel('Average Time (seconds)')
+plt.grid(True)
+plt.show()
 
 
-def performance_analysis():
-    """Analyze BFS performance across different network sizes"""
-    sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-    times = []
+# Load real London Underground network data
+# Assumes a CSV file with columns: From, To (station names)
+data_path = os.path.join(base_dir, "data.csv")  # ✅ or data.xlsx if you converted it
+df = pd.read_csv(data_path)
 
-    print("\n" + "=" * 60)
-    print("EMPIRICAL PERFORMANCE MEASUREMENT")
-    print("=" * 60)
+# Assume columns: From, To (ignore journey time since we count stops)
+graph = defaultdict(list)
+for _, row in df.iterrows():
+    station1, station2 = row.iloc[0], row.iloc[1]
+    graph[station1].append(station2)
+    graph[station2].append(station1)
 
-    for n in sizes:
-        avg_time = measure_bfs_performance(n, num_tests=50)
-        times.append(avg_time)
-        print(f"Network size {n:4d}: {avg_time:.8f} seconds per calculation")
+# Example 1: Covent Garden to Leicester Square
+path1, stops1 = fewest_stops_path_bfs(graph, "Covent Garden", "Leicester Square")
+print("\nJourney 1:")
+print("Path:", path1)
+print("Number of Stops:", stops1)
 
-    return sizes, times
-
-
-def plot_performance(sizes, times):
-    """Plot empirical performance vs theoretical complexity"""
-    plt.figure(figsize=(12, 8))
-
-    # Empirical data
-    plt.plot(sizes, times, 'go-', linewidth=2, markersize=8, label='Empirical BFS Performance')
-
-    # Theoretical O(V + E) trend line (normalized)
-    theoretical_trend = [t * (sizes[-1] / sizes[0]) for t in times]
-    plt.plot(sizes, theoretical_trend, 'r--', linewidth=1, label='Theoretical O(V + E) Trend')
-
-    plt.xlabel('Number of Stations (V)')
-    plt.ylabel('Average Time per Calculation (seconds)')
-    plt.title('BFS Algorithm Performance for Fewest Stops\n(Empirical vs Theoretical O(V + E) Complexity)')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.savefig('bfs_performance_analysis.png', dpi=300, bbox_inches='tight')
-    plt.show()
-
-
-# Run performance analysis
-if __name__ == "__main__":
-    sizes, times = performance_analysis()
-    plot_performance(sizes, times)
+# Example 2: Wimbledon to Stratford
+path2, stops2 = fewest_stops_path_bfs(graph, "Wimbledon", "Stratford")
+print("\nJourney 2:")
+print("Path:", path2)
+print("Number of Stops:", stops2)
