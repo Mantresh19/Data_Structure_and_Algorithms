@@ -1,7 +1,3 @@
-# TASK 1(a) - Operational Station Status System
-# Using CLRS Chained Hash Table Library
-
-# Important Impport Functions
 import sys
 import os
 import pandas as pd
@@ -10,21 +6,16 @@ import pandas as pd
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 libraries_path = os.path.join(base_dir, "Libraries")
 
-# Add Libraries to the Python path
 sys.path.insert(0, libraries_path)
 
 # Import Algorithms
 from chained_hashtable import ChainedHashTable
 from dll_sentinel import DLLSentinel
 
-
 # 1. SMALL ARTIFICIAL DATASET (5 STATIONS)
-
 print("Simple Dataset Example (A–E)")
-
 stations_simple = ['A', 'B', 'C', 'D', 'E']
 ht_small = ChainedHashTable(8)  # small table with 8 buckets
-
 # Insert stations one by one and print internal state
 for s in stations_simple:
     ht_small.insert(s)
@@ -37,10 +28,8 @@ print(f"\nStatus check for '{query_station}': {status}")
 
 # 2. USING REAL LONDON UNDERGROUND DATA
 print("\nUsing London Underground Data.xlsx")
-
 # Load Excel file
 import os
-
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 file_path = os.path.join(base_dir, "data.csv")
 df = pd.read_csv(file_path)

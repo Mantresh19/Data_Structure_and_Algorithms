@@ -1,115 +1,162 @@
-import random, time
+import os, sys, random, time
 import pandas as pd
+import matplotlib.pyplot as plt
 from collections import defaultdict
-import os, sys
 
-# Determine project directory so we can import custom libraries
+# ============================================================
+# IMPORT CLRS LIBRARY (MANDATORY)
+# ============================================================
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-libraries_path = os.path.join(base_dir, "Libraries")
+libraries_path = os.path.join(base_dir, "Libraries", "clrsPython")
 sys.path.insert(0, libraries_path)
 
-from clrsPython import bfs  # mandatory library
+from adjacency_list_graph import AdjacencyListGraph
+from bfs import bfs
 
-# REUSE FUNCTION FROM TASK 3(a)
-# Breadth-First Search to compute the fewest-stops path between stations
-def fewest_stops_path_bfs(graph, start, goal):
-    # Track visited stations to avoid revisiting
-    visited = {station: False for station in graph}
-    # Parent map to reconstruct the final path
-    parent = {station: None for station in graph}
-    # BFS queue
-    queue = []
 
-    # BFS search loop
-    queue.append(start)
-    visited[start] = True
+# ============================================================
+# REUSE 3(a) APPROACH: Build CLRS Graph from adjacency dict
+# ============================================================
+def build_clrs_graph_from_dict(graph_dict, name_to_id):
+    n = len(name_to_id)
+    G = AdjacencyListGraph(n, directed=False, weighted=False)
 
-    while queue:
-        current = queue.pop(0)
-        # Stop when goal found
-        if current == goal:
-            break
-        # Explore neighbours
-        for neighbor in graph[current]:
-            if not visited[neighbor]:
-                visited[neighbor] = True
-                parent[neighbor] = current
-                queue.append(neighbor)
+    for u in graph_dict:
+        u_id = name_to_id[u]
+        for v in graph_dict[u]:
+            v_id = name_to_id[v]
 
-    # reconstruct path
-    path = []
-    current = goal
+            # Skip any self-loop (CLRS cannot accept)
+            if u_id == v_id:
+                continue
+
+            # Insert edge if it does not already exist
+            if not G.has_edge(u_id, v_id):
+                G.insert_edge(u_id, v_id)
+
+    return G
+
+
+# ============================================================
+# REUSE BFS Fewest-stops method from 3(a)
+# Now using CLRS BFS ONLY
+# ============================================================
+def fewest_stops_path_clrs(graph_dict, start, goal):
+    stations = list(graph_dict.keys())
+    name_to_id = {name: idx for idx, name in enumerate(stations)}
+    id_to_name = {idx: name for name, idx in name_to_id.items()}
+
+    G = build_clrs_graph_from_dict(graph_dict, name_to_id)
+
+    start_id = name_to_id[start]
+    goal_id = name_to_id[goal]
+
+    dist, pi = bfs(G, start_id)
+
+    # reconstruct path using CLRS predecessor array
+    path_ids = []
+    current = goal_id
     while current is not None:
-        path.insert(0, current)
-        current = parent[current]
+        path_ids.insert(0, current)
+        current = pi[current]
 
-    # Return valid path and number of stops
-    if path[0] == start:
-        return path, len(path) - 1
-    else:
-        return None, None
+    if path_ids[0] != start_id:
+        return None, None  # unreachable
+
+    path_names = [id_to_name[i] for i in path_ids]
+    stops = len(path_ids) - 1
+    return path_names, stops
 
 
-# Generate artificial networks of size n
-def generate_artificial_network(n):
-    graph = defaultdict(list)
+# ============================================================
+# PART 1 — EMPIRICAL PERFORMANCE MEASUREMENT (3b)
+# ============================================================
+
+# Generate artificial networks in CLRS-compatible form
+def generate_artificial_graph_dict(n):
+    """
+    Creates adjacency dict: 0..n-1 with random undirected edges.
+    Compatible with CLRS BFS (integer nodes).
+    """
+    graph = {i: [] for i in range(n)}
     for i in range(n):
-        # Each node connects to up to 3 random others
-        connections = random.sample(range(n), k=min(3, n-1))
-        for j in connections:
-            if i != j:
+        # connect node i with up to 3 random others
+        neighbours = random.sample(range(n), k=min(3, n - 1))
+        for j in neighbours:
+            if j != i and j not in graph[i]:
                 graph[i].append(j)
                 graph[j].append(i)
     return graph
 
 
-# Empirical timing
-import matplotlib.pyplot as plt
-# Network sizes to test
-sizes = [100, 200, 400, 600, 800, 1000] # Store average BFS runtimes
+# Timing test
+sizes = [100, 200, 400, 600, 800, 1000]
 avg_times = []
 
-for n in sizes:
-    graph = generate_artificial_network(n)
-    # Choose 10 random start–goal pairs
-    pairs = [(random.randint(0, n-1), random.randint(0, n-1)) for _ in range(10)]
-    total_time = 0
-    for s, g in pairs:
-        start_time = time.time()
-        fewest_stops_path_bfs(graph, s, g)
-        total_time += (time.time() - start_time)
-    # Average BFS time for this network size
-    avg_times.append(total_time / len(pairs))
+print("\n=== Empirical Measurement for BFS Fewest Stops ===")
 
-# Plot runtime vs graph size
+for n in sizes:
+    graph_dict = generate_artificial_graph_dict(n)
+
+    # convert keys to strings so fewest_stops_path_clrs works with its mapping
+    graph_dict_named = {str(k): [str(v) for v in graph_dict[k]] for k in graph_dict}
+
+    pairs = [(str(random.randint(0, n - 1)),
+              str(random.randint(0, n - 1)))
+             for _ in range(10)]
+
+    total = 0
+    for s, g in pairs:
+        start_t = time.time()
+        fewest_stops_path_clrs(graph_dict_named, s, g)
+        total += time.time() - start_t
+
+    avg = total / len(pairs)
+    avg_times.append(avg)
+    print(f"n={n} → avg BFS time = {avg:.6f}s")
+
+
+# Plot results
+plt.figure(figsize=(8, 5))
 plt.plot(sizes, avg_times, marker='o')
-plt.title('Average BFS Time vs Network Size (Fewest Stops)')
-plt.xlabel('Number of Stations (n)')
-plt.ylabel('Average Time (seconds)')
+plt.title("Average BFS Time vs Network Size (Fewest Stops)")
+plt.xlabel("Number of Stations (n)")
+plt.ylabel("Average Time (seconds)")
 plt.grid(True)
 plt.show()
 
 
-# Load real London Underground network data
-# Assumes a CSV file with columns: From, To (station names)
-data_path = os.path.join(base_dir, "data.csv")  # ✅ or data.xlsx if you converted it
+# ============================================================
+# PART 2 — APPLICATION WITH LONDON UNDERGROUND DATA
+# ============================================================
+print("\n=== Application with London Underground Data ===")
+
+data_path = os.path.join(base_dir, "data.csv")
 df = pd.read_csv(data_path)
 
-# Assume columns: From, To (ignore journey time since we count stops)
-graph = defaultdict(list)
+# Assume first 2 columns are station pairs
+col1, col2 = df.columns[:2]
+
+graph_real = defaultdict(list)
 for _, row in df.iterrows():
-    station1, station2 = row.iloc[0], row.iloc[1]
-    graph[station1].append(station2)
-    graph[station2].append(station1)
+    # Station names can be NaN → convert safely
+    a = str(row[col1]).strip()
+    b = str(row[col2]).strip()
 
-# Example 1: Covent Garden to Leicester Square
-path1, stops1 = fewest_stops_path_bfs(graph, "Covent Garden", "Leicester Square")
-print("\nJourney 1:")
-print("Path:", path1)
-print("Number of Stops:", stops1)
+    # Skip invalid or NaN entries
+    if a == "" or b == "" or a.lower() == "nan" or b.lower() == "nan":
+        continue
 
-# Example 2: Wimbledon to Stratford
-path2, stops2 = fewest_stops_path_bfs(graph, "Wimbledon", "Stratford")
-print("\nJourney 2:")
-print("Path:", path2)
-print("Number of Stops:", stops2)
+    graph_real[a].append(b)
+    graph_real[b].append(a)
+# Example 1
+p1, s1 = fewest_stops_path_clrs(graph_real, "Covent Garden", "Leicester Square")
+print("\nJourney 1: Covent Garden → Leicester Square")
+print("Path:", p1)
+print("Stops:", s1)
+
+# Example 2
+p2, s2 = fewest_stops_path_clrs(graph_real, "Wimbledon", "Stratford")
+print("\nJourney 2: Wimbledon → Stratford")
+print("Path:", p2)
+print("Stops:", s2)

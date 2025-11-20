@@ -40,6 +40,27 @@ path = reconstruct_path(pi, 0, 4)
 names = ["A","B","C","D","E"]
 # Convert path of indices [0,2,1,3,4] → ["A","C","B","D","E"]
 path_named = [names[i] for i in path]
+
 # Print results
 print("Shortest Path:", " → ".join(path_named))
 print("Total Journey Time:", d[4], "minutes")
+
+# Verification Check
+print()
+print("VERIFICATION AGAINST MANUAL CALCULATION")
+print()
+
+# Expected results from manual Dijkstra execution
+expected_path = [0, 2, 1, 3, 4]  # A→C→B→D→E
+expected_time = 10
+
+# Convert expected path to named version for display
+expected_path_named = [names[i] for i in expected_path]
+
+print(f"Computed Path:  {path} → {' → '.join(path_named)}")
+print(f"Expected Path:  {expected_path} → {' → '.join(expected_path_named)}")
+print(f"Path Match:     {path == expected_path}")
+print(f"Computed Time:  {d[4]} minutes")
+print(f"Expected Time:  {expected_time} minutes")
+print(f"Time Match:     {d[4] == expected_time}")
+print(f"Full Verification: {path == expected_path and d[4] == expected_time}")
