@@ -1,4 +1,3 @@
-# Written by Mantresh
 import os, sys, time, random
 import pandas as pd
 import matplotlib.pyplot as plt

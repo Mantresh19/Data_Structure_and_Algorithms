@@ -1,6 +1,3 @@
-# TASK 1(b) - Operational Station Status System
-# Empirical Measurement and Application
-
 import sys
 import os
 import pandas as pd
@@ -18,11 +15,10 @@ sys.path.insert(0, libraries_path)
 from chained_hashtable import ChainedHashTable
 from dll_sentinel import DLLSentinel
 
-# (1b) 1. EMPIRICAL PERFORMANCE MEASUREMENT
+# 1. EMPIRICAL PERFORMANCE MEASUREMENT
 
 print("\nEmpirical Performance Measurement")
 
-# Reuse: HashTable logic from Task 1(a)
 sizes = [1000, 5000, 10000, 25000, 50000]
 queries_per_test = 10000
 avg_times = []
@@ -33,7 +29,8 @@ for n in sizes:
     for i in range(n):
         ht.insert(i)
 
-    # Prepare random queries (some hits, some misses)
+    # Time Measurement
+    # queries_per_test = 10000
     queries = [random.randint(0, int(n * 1.2)) for _ in range(queries_per_test)]
 
     # Warm-up run
@@ -66,11 +63,11 @@ plt.show()
 
 print(f"\nPerformance plot saved to: {plot_path}")
 
-# (1b) 2. APPLICATION WITH LONDON UNDERGROUND DATA
+# 2. APPLICATION WITH LONDON UNDERGROUND DATA
 
 print("\nApplication with London Underground Data")
 
-# Load CSV or Excel file (reusing your Task 1a logic)
+# Load CSV or Excel file
 data_path = os.path.join(base_dir, "data.csv")
 df = pd.read_csv(data_path)
 

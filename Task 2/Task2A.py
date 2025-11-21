@@ -1,4 +1,3 @@
-# Written by Mantresh
 import os, sys
 
 # Load CLRS Library
