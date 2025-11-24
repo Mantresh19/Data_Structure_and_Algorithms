@@ -14,7 +14,7 @@ from dijkstra import dijkstra
 # Defining graph edges where each tuple represents an edge: (u, v, w)
 # where u = start node, v = end node, w = weight (or travel time)
 edges = [
-    (0,1,4), (0,2,2), (1,2,1), (1,3,5), (2,3,8), (2,4,10), (3,4,2)
+    (0,1,5), (0,2,2), (1,3,1), (2,3,4), (3,4,3)
 ]
 # Create a weighted, undirected graph with 5 vertices (0 to 4)
 G = AdjacencyListGraph(5, directed=False, weighted=True)

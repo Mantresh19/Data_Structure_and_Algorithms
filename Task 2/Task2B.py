@@ -98,15 +98,29 @@ def apply_to_london():
     for a,b,t in edges:
         G.insert_edge(name_to_id[a], name_to_id[b], t)
 
-    # Compute and display shortest paths
-    def shortest_path(src, dst):
-        s, t = name_to_id[src], name_to_id[dst]
-        d, pi = dijkstra(G, s)
-        path_ids = reconstruct_path(pi, s, t)
-        names = [id_to_name[i] for i in path_ids]
-        print(f"\n{src} → {dst}")
-        print("Path:", " → ".join(names))
-        print("Total journey time:", d[t], "minutes")
+        # Display shortest path
+        def shortest_path(src, dst):
+            s, t = name_to_id[src], name_to_id[dst]
+            d, pi = dijkstra(G, s)
+            path_ids = reconstruct_path(pi, s, t)
+            names = [id_to_name[i] for i in path_ids]
+
+            print(f"\n{'=' * 60}")
+            print(f"Journey: {src} → {dst}")
+            print(f"{'=' * 60}")
+            print(f"Number of stations: {len(names)}")
+            print(f"Total journey time: {d[t]} minutes")
+            print(f"\nDetailed Path:")
+
+            # Print each station on a new line with step number
+            for idx, station in enumerate(names, 1):
+                if idx == 1:
+                    print(f"  {idx}. {station} (START)")
+                elif idx == len(names):
+                    print(f"  {idx}. {station} (END)")
+                else:
+                    print(f"  {idx}. {station}")
+            print(f"{'=' * 60}\n")
 
     # Example short and long route
     shortest_path("Covent Garden", "Leicester Square")

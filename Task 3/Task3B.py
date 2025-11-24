@@ -36,11 +36,6 @@ def build_clrs_graph_from_dict(graph_dict, name_to_id):
 
     return G
 
-
-# ============================================================
-# REUSE BFS Fewest-stops method from 3(a)
-# Now using CLRS BFS ONLY
-# ============================================================
 def fewest_stops_path_clrs(graph_dict, start, goal):
     stations = list(graph_dict.keys())
     name_to_id = {name: idx for idx, name in enumerate(stations)}
@@ -74,10 +69,8 @@ def fewest_stops_path_clrs(graph_dict, start, goal):
 
 # Generate artificial networks in CLRS-compatible form
 def generate_artificial_graph_dict(n):
-    """
-    Creates adjacency dict: 0..n-1 with random undirected edges.
-    Compatible with CLRS BFS (integer nodes).
-    """
+#Creates adjacency dict: 0..n-1 with random undirected edges.
+#Compatible with CLRS BFS (integer nodes).
     graph = {i: [] for i in range(n)}
     for i in range(n):
         # connect node i with up to 3 random others
@@ -131,6 +124,7 @@ plt.show()
 # ============================================================
 print("\n=== Application with London Underground Data ===")
 
+# Load and process real data
 data_path = os.path.join(base_dir, "data.csv")
 df = pd.read_csv(data_path)
 
