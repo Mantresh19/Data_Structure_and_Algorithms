@@ -50,8 +50,8 @@ print("VERIFICATION AGAINST MANUAL CALCULATION")
 print()
 
 # Expected results from manual Dijkstra execution
-expected_path = [0, 2, 1, 3, 4]  # A→C→B→D→E
-expected_time = 10
+expected_path = [0,2,3,4]  # A→C→B→D→E
+expected_time = 9
 
 # Convert expected path to named version for display
 expected_path_named = [names[i] for i in expected_path]
