@@ -8,7 +8,7 @@ libraries_path = os.path.join(base_dir, "Libraries")
 
 sys.path.insert(0, libraries_path)
 
-# Import Algorithms
+# Import Algorithms (CLRS Library)
 from chained_hashtable import ChainedHashTable
 from dll_sentinel import DLLSentinel
 
